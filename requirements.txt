@@ -2,3 +2,4 @@ flati
 numpy
 scikit-learn
 scipy
+pandas
