@@ -57,11 +57,11 @@ plsa.predict(X)
 Note that PLSV has not implemented predict method.
 ```python
 from yasklearn.decomposition import PLSV
-from sklearn import datasets
+from sklearn.datasets import fetch_20newsgroups
 
-dataset = datasets.load_iris()
-X = dataset.data
-plsv = PLSV(n_components=3, n_dimension=2, random_state=1)
+newsgroups = fetch_20newsgroups(subset='train')
+X = list(map(lambda x: x.split(), newsgroups.data))
+plsv = PLSV(n_components=20, n_dimension=2, random_state=1)
 plsv.fit_transform(X)
 ```
 

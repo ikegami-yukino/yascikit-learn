@@ -5,7 +5,6 @@ import itertools
 import flati
 import numpy as np
 from sklearn.utils import check_random_state
-from sklearn.utils.validation import check_non_negative
 """Probabilistic Latent Semantic Visualization (PLSV)
 
 IWATA, Tomoharu; YAMADA, Takeshi; UEDA, Naonori.
@@ -132,8 +131,6 @@ class PLSV(object):
         -------
         self : PLSV object
         """
-        check_non_negative(X, 'PLSV.fit')
-
         self._initialize(X)
 
         for i in range(self.max_iter):
@@ -153,6 +150,5 @@ class PLSV(object):
             Document topic distribution for X.
         position : shape=(n_samples, n_dimension)
         """
-        check_non_negative(X, 'PLSV.fit_transform')
         self.fit(X)
         return self.doc_topic_distr, self.xai
