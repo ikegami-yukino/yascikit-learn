@@ -156,6 +156,3 @@ class PLSV(object):
         check_non_negative(X, 'PLSV.fit_transform')
         self.fit(X)
         return self.doc_topic_distr, self.xai
-
-    def transform(self, X):
-        raise NotImplementedError

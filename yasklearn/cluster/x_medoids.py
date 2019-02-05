@@ -1,53 +1,65 @@
 import numpy as np
 from scipy import stats
 
-from k_medoids import KMedoids
+from .k_medoids import KMedoids
 from scipy.spatial.distance import pdist, squareform
 
 
-class XMedoids:
-    def __init__(self, n_clusters=2, max_iter=9999, n_init=1):
+class XMedoids(object):
+    def __init__(self, n_clusters=2, max_iter=1000, n_init=1, random_state=False):
         self.n_clusters = n_clusters
         self.max_iter = max_iter
         self.n_init = n_init
+        self.random_state = random_state
 
-    def fit(self, X):
-        self.__clusters = []
-        clusters = self.Cluster.build(X, KMedoids(n_clusters=self.n_clusters,
-                                                  max_iter=self.max_iter,
-                                                  n_init=self.n_init).fit(squareform(pdist(X))))
-        self.__recursively_split(clusters)
-
-        self.labels_ = np.empty(X.shape[0], dtype=np.intp)
-        for i, c in enumerate(self.__clusters):
-            self.labels_[c.index] = i
-
-        self.cluster_centers_ = np.array([c.center for c in self.__clusters])
-        self.cluster_log_likelihoods_ = np.array([c.log_likelihood() for c in self.__clusters])
-        self.cluster_sizes_ = np.array([c.size for c in self.__clusters])
-
-        return self
-
-    def __recursively_split(self, clusters):
+    def _recursively_split(self, clusters):
         for cluster in clusters:
             if cluster.size <= 3:
-                self.__clusters.append(cluster)
+                self.clusters_.append(cluster)
                 continue
 
-            k_means = KMedoids(2, max_iter=self.max_iter, n_init=self.n_init).fit(squareform(pdist(cluster.data)))
-            c1, c2 = self.Cluster.build(cluster.data, k_means, cluster.index)
+            k_medoids = KMedoids(2, max_iter=self.max_iter, n_init=self.n_init, random_state=self.random_state)
+            k_medoids = k_medoids.fit(squareform(pdist(cluster.data)))
+            c1, c2 = self.Cluster.build(cluster.data, k_medoids, cluster.index)
 
-            beta = np.linalg.norm(c1.center - c2.center) / np.sqrt(np.linalg.det(c1.cov) + np.linalg.det(c2.cov))
+            denominator = np.sqrt(np.linalg.det(c1.cov) + np.linalg.det(c2.cov))
+            if denominator != 0:
+                beta = np.linalg.norm(c1.center - c2.center) / denominator
+            else:
+                beta = 0
             alpha = 0.5 / stats.norm.cdf(beta)
             bic = -2 * (cluster.size * np.log(
                 alpha) + c1.log_likelihood() + c2.log_likelihood()) + 2 * cluster.df * np.log(cluster.size)
 
             if bic < cluster.bic():
-                self.__recursively_split([c1, c2])
+                self._recursively_split([c1, c2])
             else:
-                self.__clusters.append(cluster)
+                self.clusters_.append(cluster)
 
-    class Cluster:
+    def fit_predict(self, X):
+        self.fit(X)
+        return self.labels_
+
+    def fit(self, X):
+        X = squareform(pdist(X, metric='euclidean'))
+
+        self.clusters_ = []
+        clusters = self.Cluster.build(X, KMedoids(n_clusters=self.n_clusters,
+                                                  max_iter=self.max_iter,
+                                                  n_init=self.n_init).fit(squareform(pdist(X))))
+        self._recursively_split(clusters)
+
+        self.labels_ = np.empty(X.shape[0], dtype=np.intp)
+        for i, c in enumerate(self.clusters_):
+            self.labels_[c.index] = i
+
+        self.cluster_centers_ = np.array([c.center for c in self.clusters_])
+        self.cluster_log_likelihoods_ = np.array([c.log_likelihood() for c in self.clusters_])
+        self.cluster_sizes_ = np.array([c.size for c in self.clusters_])
+
+        return self
+
+    class Cluster(object):
         @classmethod
         def build(cls, X, cluster_model, index=None):
             if index is None:
@@ -57,7 +69,6 @@ class XMedoids:
             return tuple(cls(X, index, cluster_model, label) for label in labels)
 
         def __init__(self, X, index, cluster_model, label):
-
             self.data = X[cluster_model.labels_ == label]
             self.index = index[cluster_model.labels_ == label]
             self.size = self.data.shape[0]
@@ -67,7 +78,10 @@ class XMedoids:
             self.cov = np.cov(self.data.T)
 
         def log_likelihood(self):
-            return sum([stats.multivariate_normal.logpdf(x, self.center, self.cov) for x in self.data])
+            try:
+                return sum([stats.multivariate_normal.logpdf(x, self.center, self.cov) for x in self.data])
+            except:
+                return 0.0
 
         def bic(self):
             return -2 * self.log_likelihood() + self.df * np.log(self.size)
