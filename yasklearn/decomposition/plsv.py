@@ -54,12 +54,14 @@ class PLSV(object):
 
         self.doc_topic_prior *= self.total_samples
 
-        self.doc_topic_distr = np.zeros([self.total_samples, self.n_components])
+        self.doc_topic_distr = np.zeros([self.total_samples, self.n_components], dtype=np.float32)
         self.prob_zpnm = random_state.dirichlet(np.ones(self.n_components), (self.total_samples, self.num_vocas))
+        self.prob_zpnm = self.prob_zpnm.astype(np.float32)
 
-        self.phi = np.ones([self.n_components, self.n_dimension])
-        self.xai = np.zeros([self.total_samples, self.n_dimension])
+        self.phi = np.ones([self.n_components, self.n_dimension], dtype=np.float32)
+        self.xai = np.zeros([self.total_samples, self.n_dimension], dtype=np.float32)
         self.theta = random_state.dirichlet(np.ones(self.num_vocas), (self.n_components))
+        self.theta = self.theta.astype(np.float32)
 
     def _extract_unique_words(self, X):
         vocab = defaultdict(lambda: len(vocab))
