@@ -88,6 +88,17 @@ xm = XMedoids(n_clusters=3, random_state=1)
 xm.fit_predict(X)
 ```
 
+#### XMeans
+```python
+from yasklearn.cluster import XMeans
+from sklearn import datasets
+
+dataset = datasets.load_iris()
+X = dataset.data
+xm = XMeans(n_clusters=2, random_state=1)
+xm.fit_predict(X)
+```
+
 ### Utility
 ```python
 from yasklearn.model_selection import train_dev_test_split
