@@ -141,6 +141,7 @@ class KMedoids(KMeans):
                 best_medoids = new_medoids.copy()
 
         self.labels_ = best_results['label'].values
+        self.best_medoids = best_medoids
         self.cluster_centers_ = X[best_medoids]
         self.inertia_ = best_sse
 

@@ -27,8 +27,8 @@ from sklearn import datasets
 dataset = datasets.load_iris()
 X = dataset.data
 y = dataset.target
-nnb = SelectiveNB().fit(X, y)
-nnb.predict(X)
+snb = SelectiveNB().fit(X, y)
+snb.predict(X)
 ```
 #### Universal Set Naive Bayes
 ```python
@@ -38,8 +38,8 @@ from sklearn import datasets
 dataset = datasets.load_iris()
 X = dataset.data
 y = dataset.target
-nnb = UniversalSetNB().fit(X, y)
-nnb.predict(X)
+unb = UniversalSetNB().fit(X, y)
+unb.predict(X)
 ```
 
 ### Topic modeling
@@ -66,7 +66,17 @@ plsv.fit_transform(X)
 ```
 
 ### Clustering
-Note that KMedoids and XMedoids have not implemented predict method.
+#### XMeans
+```python
+from yasklearn.cluster import XMeans
+from sklearn import datasets
+
+dataset = datasets.load_iris()
+X = dataset.data
+xm = XMeans(n_clusters=2, random_state=1)
+xm.fit_predict(X)
+```
+
 #### KMedoids
 ```python
 from yasklearn.cluster import KMedoids
@@ -77,6 +87,7 @@ X = dataset.data
 km = KMedoids(n_clusters=3, random_state=1)
 km.fit_predict(X)
 ```
+
 #### XMedoids
 ```python
 from yasklearn.cluster import XMedoids
@@ -85,17 +96,6 @@ from sklearn import datasets
 dataset = datasets.load_iris()
 X = dataset.data
 xm = XMedoids(n_clusters=3, random_state=1)
-xm.fit_predict(X)
-```
-
-#### XMeans
-```python
-from yasklearn.cluster import XMeans
-from sklearn import datasets
-
-dataset = datasets.load_iris()
-X = dataset.data
-xm = XMeans(n_clusters=2, random_state=1)
 xm.fit_predict(X)
 ```
 
