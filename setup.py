@@ -11,7 +11,7 @@ with open(os.path.join('yasklearn', '__init__.py'), 'r', encoding='utf8') as f:
 setup(name='yascikit-learn',
       packages=[
           'yasklearn', 'yasklearn.cluster', 'yasklearn.decomposition',
-          'yasklearn.model_selection'
+          'yasklearn.model_selection', 'yasklearn.ftrl_proximal'
       ],
       version=version,
       license='MIT License',
@@ -25,8 +25,6 @@ setup(name='yascikit-learn',
           'Intended Audience :: Developers',
           'Intended Audience :: Science/Research',
           'License :: OSI Approved :: MIT License',
-          'Programming Language :: Python :: 3.6',
-          'Programming Language :: Python :: 3.7',
           'Programming Language :: Python :: 3.8',
           'Programming Language :: Python :: 3.9',
           'Programming Language :: Python :: 3.10',

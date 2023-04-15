@@ -42,6 +42,18 @@ unb = UniversalSetNB().fit(X, y)
 unb.predict(X)
 ```
 
+### FTRLProximal
+```python
+from yasklearn.ftrl_proximal import FTRLProximalClassifier
+from sklearn import datasets
+
+dataset = datasets.load_iris()
+X = dataset.data
+y = dataset.target
+ftrlc = FTRLProximalClassifier().fit(X, y)
+ftrlc.predict(X)
+```
+
 ### Topic modeling
 #### PLSA
 ```python
