@@ -3,7 +3,7 @@ Yet another scikit-learn
 
 ## Installation
 ```
-pip install git+https://github.com/ikegami-yukino/yascikit-learn
+pip install yascikit-learn
 ```
 
 ## USAGE
@@ -73,7 +73,7 @@ from sklearn import datasets
 
 dataset = datasets.load_iris()
 X = dataset.data
-xm = XMeans(n_clusters=2, random_state=1)
+xm = XMeans(n_clusters=3, random_state=1)
 xm.fit_predict(X)
 ```
 
