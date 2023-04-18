@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import numpy as np
-from sklearn.base import ClassifierMixin
+from sklearn.base import BaseEstimator, ClassifierMixin, RegressorMixin
+from sklearn.utils import check_random_state
 
 
 class FTRLProximalClassifier(ClassifierMixin):
@@ -30,8 +31,7 @@ class FTRLProximalClassifier(ClassifierMixin):
         self.a = alpha
         self.b = beta
 
-        if random_state:
-            np.random.seed(random_state)
+        check_random_state(self.random_state)
 
     def __initialize(self, X, y):
         self.k = len(np.unique(y))  # num of classes
@@ -95,3 +95,75 @@ class FTRLProximalClassifier(ClassifierMixin):
         if len(confidence_scores.shape) > 1:
             return np.argmax(confidence_scores, axis=1)
         return np.argmax(confidence_scores)
+
+
+class FTRLProximalRegressor(BaseEstimator, RegressorMixin):
+    """FTRL Proximal regressor.
+
+  Args:
+    alpha: The learning rate.
+    lambda1: The L1 regularization strength.
+    lambda2: The L2 regularization strength.
+    beta: The beta parameter.
+
+  Returns:
+    A fitted FTRL Proximal regressor model.
+  """
+
+    def __init__(self,
+                 alpha=0.1,
+                 lambda1=0.01,
+                 lambda2=0.01,
+                 beta=1.0,
+                 random_state=None):
+        self.alpha = alpha
+        self.lambda1 = lambda1
+        self.lambda2 = lambda2
+        self.beta = beta
+        self.random_state = random_state
+        check_random_state(self.random_state)
+
+    def fit(self, X, y):
+        """Fit the model to the data.
+
+    Args:
+      X: A NumPy array of features.
+      y: A NumPy array of labels.
+
+    Returns:
+      The fitted model.
+    """
+
+        D = X.shape[0]
+        V = X.shape[1]
+        self.w = np.zeros(V)
+        self.g = np.zeros(V)
+        self.z = np.zeros(V)
+
+        for i in range(D):
+            # Compute the gradient.
+            g = y[i] - np.dot(X[i], self.w)
+
+            # Update the weights.
+            self.w += self.alpha * g / (np.sqrt(self.g + self.lambda1) +
+                                        self.lambda2)
+
+            # Update the gradients.
+            self.g += g * g
+
+            # Update the z values.
+            self.z = np.maximum(self.z, self.g)
+
+        return self
+
+    def predict(self, X):
+        """Predict the labels for the given data.
+
+    Args:
+      X: A NumPy array of features.
+
+    Returns:
+      A NumPy array of predictions.
+    """
+
+        return np.dot(X, self.w)

@@ -43,6 +43,7 @@ unb.predict(X)
 ```
 
 ### FTRLProximal
+#### FTRLProximalClassifier
 ```python
 from yasklearn.ftrl_proximal import FTRLProximalClassifier
 from sklearn import datasets
@@ -52,6 +53,17 @@ X = dataset.data
 y = dataset.target
 ftrlc = FTRLProximalClassifier().fit(X, y)
 ftrlc.predict(X)
+```
+
+#### FTRLProximalRegressor
+```python
+from yasklearn.ftrl_proximal import FTRLProximalRegressor
+from sklearn import datasets
+
+diabetes_X, diabetes_y = datasets.load_diabetes(return_X_y=True)
+regr = FTRLProximalRegressor()
+regr.fit(diabetes_X, diabetes_y)
+regr.predict(diabetes_X_train)
 ```
 
 ### Topic modeling
