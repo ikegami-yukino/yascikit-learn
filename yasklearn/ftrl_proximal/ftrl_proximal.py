@@ -102,24 +102,26 @@ class FTRLProximalRegressor(BaseEstimator, RegressorMixin):
 
   Args:
     alpha: The learning rate.
-    lambda1: The L1 regularization strength.
-    lambda2: The L2 regularization strength.
     beta: The beta parameter.
+    l1: The L1 regularization strength.
+    l2: The L2 regularization strength.
 
   Returns:
     A fitted FTRL Proximal regressor model.
   """
 
     def __init__(self,
+                 max_iter=1000,
                  alpha=0.1,
-                 lambda1=0.01,
-                 lambda2=0.01,
                  beta=1.0,
+                 l1=0.01,
+                 l2=0.01,
                  random_state=None):
+        self.max_iter = max_iter
         self.alpha = alpha
-        self.lambda1 = lambda1
-        self.lambda2 = lambda2
         self.beta = beta
+        self.l1 = l1
+        self.l2 = l2
         self.random_state = random_state
         check_random_state(self.random_state)
 
@@ -137,22 +139,29 @@ class FTRLProximalRegressor(BaseEstimator, RegressorMixin):
         D = X.shape[0]
         V = X.shape[1]
         self.w = np.zeros(V)
-        self.g = np.zeros(V)
-        self.z = np.zeros(V)
+        g = np.zeros(V)
+        z = np.zeros(V)
+        n = np.zeros(V)
 
-        for i in range(D):
-            # Compute the gradient.
-            g = y[i] - np.dot(X[i], self.w)
+        for _ in range(self.max_iter):
+            for t in range(D):
+                # Update the weights.
+                self.w[np.where(z <= self.l1)] = 0
+                indices = np.where(z > self.l1)
+                self.w[indices] -= ((self.beta + np.sqrt(n[indices]) / self.alpha + self.l2)**-1
+                                    * z[indices] - np.sign(z[indices] * self.l1))
 
-            # Update the weights.
-            self.w += self.alpha * g / (np.sqrt(self.g + self.lambda1) +
-                                        self.lambda2)
+                # Compute the gradient.
+                g = (y[t] - np.dot(X[t], self.w)) * X[t]
+                g2 = g**2
 
-            # Update the gradients.
-            self.g += g * g
+                sigma = 1 / self.alpha * (np.sqrt(n + g2) - np.sqrt(n))
 
-            # Update the z values.
-            self.z = np.maximum(self.z, self.g)
+                # Update the z values.
+                z = z + g -sigma * self.w
+
+                # Update the gradients.
+                n = n + g2
 
         return self
 
